@@ -1,0 +1,40 @@
+{
+	"bindings": [
+		{"control": "x", "action": "helicam_nextmode"},
+		
+		// directional modes
+		{"control": "numpad8", "action": "helicam_modefront"},
+		{"control": "numpad6", "action": "helicam_moderight"},
+		{"control": "numpad2", "action": "helicam_modebehind"},
+		{"control": "numpad4", "action": "helicam_modeleft"},
+		{"control": "numpad5", "action": "helicam_modehover"},
+		
+		// other modes
+		{"control": "numpad1", "action": "helicam_modecircle"},
+		{"control": "numpad7", "action": "helicam_modeclose"},
+		{"control": "0", "action": "helicam_modestill"},
+		
+		{"control": "up", "action": "helicam_control_altitude_up"},
+		{"control": "down", "action": "helicam_control_altitude_down"},
+		{"control": "left", "action": "helicam_control_radius_down"},
+		{"control": "right", "action": "helicam_control_radius_up"},
+		{"control": "right", "action": "helicam_control_radius_up"},
+		
+		
+		{"control": "<", "action": "helicam_togglespotlight"},
+		{"control": "c", "action": "helicam_switchspotlightmode"},
+		{"control": "x", "action": "helicam_switchspotlighttype"},
+		
+		
+		//{"control": "shift i", "action": "helicam_increasethrust"},
+		//{"control": "ctrl i", "action": "helicam_decreasethrust"},
+		
+		//{"control": "shift o", "action": "helicam_increaserotsmoother"},
+		//{"control": "ctrl o", "action": "helicam_decreaserotsmoother"},
+		
+		// this doesnt work, the game doesnt recognize it
+		//{"control": "thumbly", "action": "helicam_control_radius"},
+		//{"control": "triggerr", "action": "helicam_control_altitude_up"},
+		//{"control": "triggerl", "action": "helicam_control_altitude_down"},
+	]
+}

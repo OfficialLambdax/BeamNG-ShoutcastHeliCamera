@@ -1,0 +1,4 @@
+
+Original Source code from BeamNG GmbH
+License: bCDDL-1.1
+https://beamng.com/bCDDL-1.1.txt

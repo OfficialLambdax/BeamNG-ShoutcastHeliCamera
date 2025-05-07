@@ -1,0 +1,58 @@
+{
+  "_268d0ad2_dds": {
+    "name": "_268d0ad2_dds",
+    "mapTo": "268d0ad2_dds",
+    "class": "Material",
+    "Stages": [
+      {
+        "colorMap": "/art/shapes/HeliCam/texture_0022.dds.002"
+      },
+      {},
+      {},
+      {}
+    ],
+    "translucentBlendOp": "None"
+  },
+  "_2c57f75e_dds": {
+    "name": "_2c57f75e_dds",
+    "mapTo": "2c57f75e_dds",
+    "class": "Material",
+    "Stages": [
+      {
+        "diffuseColor": [
+          0.800000012,
+          0.800000012,
+          0.800000012,
+          0.778947413
+        ]
+      },
+      {
+        "diffuseColor": null
+      },
+      {
+        "diffuseColor": null
+      },
+      {
+        "diffuseColor": null
+      }
+    ],
+    "alphaRef": 0,
+    "alphaTest": true,
+    "dynamicCubemap": true,
+    "translucent": true
+  },
+  "_653561af_dds": {
+    "name": "_653561af_dds",
+    "mapTo": "653561af_dds",
+    "class": "Material",
+    "Stages": [
+      {
+        "colorMap": "/art/shapes/HeliCam/texture_0001.dds.001"
+      },
+      {},
+      {},
+      {}
+    ],
+    "translucentBlendOp": "None"
+  }
+}

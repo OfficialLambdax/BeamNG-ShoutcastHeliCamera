@@ -1,0 +1,275 @@
+{
+    "toggle_helicam": {
+        "cat": "helicam_mod",
+        "order": 0,
+        "ctx": "tlua",
+        "onDown": "if HeliCam then HeliCam.toggleCam() end",
+        "isBasic": true,
+        "title": "Toggle Helicam",
+        "desc": "Will toggle the Helicam"
+    },
+    "despawn_heli": {
+        "cat": "helicam_mod",
+        "order": 1,
+        "ctx": "tlua",
+        "onDown": "if HeliCam then HeliCam.despawnHeli() end",
+        "isBasic": true,
+        "title": "Despawn Heli",
+        "desc": "Will despawn the Heli"
+    },
+	"helicam_toggleui": {
+        "cat": "helicam_mod",
+        "order": 2,
+        "ctx": "tlua",
+        "onDown": "if HeliCam then HeliCam.toggleUiRender() end",
+        "isBasic": true,
+        "title": "Toggle Ui Render",
+        "desc": ""
+    },
+	"helicam_toggledebug": {
+        "cat": "helicam_mod",
+        "order": 3,
+        "ctx": "tlua",
+        "onDown": "if HeliCam then HeliCam.toggleDebugDraw() end",
+        "isBasic": true,
+        "title": "Toggle debug Render",
+        "desc": ""
+    },
+	
+	"helicam_switchcontrol": {
+        "cat": "helicam_mod",
+        "order": 10,
+        "ctx": "tlua",
+        "onDown": "if HeliCam then HeliCam.toggleHeliControl() end",
+        "isBasic": true,
+        "title": "HeliControl: Toggle Vehicle Control",
+        "desc": ""
+    },
+	"helicam_control_radius": {
+        "cat": "helicam_mod",
+        "order": 11,
+        "ctx": "tlua",
+        "onChange": "if HeliCam then HeliCam.heliControlInput('radius', VALUE) end",
+        "title": "HeliControl: Radius",
+		"isCentered":true,
+        "desc": ""
+    },
+	"helicam_control_altitude": {
+        "cat": "helicam_mod",
+        "order": 12,
+        "ctx": "tlua",
+        "onChange": "if HeliCam then HeliCam.heliControlInput('altitude', VALUE) end",
+        "title": "HeliControl: Altitude",
+		"isCentered":true,
+        "desc": ""
+    },
+	"helicam_control_radius_up": {
+        "cat": "helicam_mod",
+        "order": 13,
+        "ctx": "tlua",
+        "onChange": "if HeliCam then HeliCam.heliControlInput('radius_up', VALUE) end",
+        "title": "HeliControl: Radius Up",
+        "desc": ""
+    },
+	"helicam_control_radius_down": {
+        "cat": "helicam_mod",
+        "order": 14,
+        "ctx": "tlua",
+        "onChange": "if HeliCam then HeliCam.heliControlInput('radius_down', VALUE) end",
+        "title": "HeliControl: Radius Down",
+        "desc": ""
+    },
+	"helicam_control_altitude_up": {
+        "cat": "helicam_mod",
+        "order": 15,
+        "ctx": "tlua",
+        "onChange": "if HeliCam then HeliCam.heliControlInput('altitude_up', VALUE) end",
+        "title": "HeliControl: Altitude Up",
+        "desc": ""
+    },
+	"helicam_control_altitude_down": {
+        "cat": "helicam_mod",
+        "order": 16,
+        "ctx": "tlua",
+        "onChange": "if HeliCam then HeliCam.heliControlInput('altitude_down', VALUE) end",
+        "title": "HeliControl: Altitude Down",
+        "desc": ""
+    },
+	
+	
+    "helicam_nextmode": {
+        "cat": "helicam_mod",
+        "order": 20,
+        "ctx": "tlua",
+        "onDown": "if HeliCam then HeliCam.nextMode() end",
+        "isBasic": true,
+        "title": "HeliControl: Next mode",
+        "desc": "Switches to the next mode"
+    },
+	"helicam_modehover": {
+        "cat": "helicam_mod",
+        "order": 21,
+        "ctx": "tlua",
+        "onDown": "if HeliCam then HeliCam.setMode(1) end",
+        "isBasic": true,
+        "title": "HeliControl: Hover Above",
+        "desc": ""
+    },
+	"helicam_modecircle": {
+        "cat": "helicam_mod",
+        "order": 22,
+        "ctx": "tlua",
+        "onDown": "if HeliCam then HeliCam.setMode(2) end",
+        "isBasic": true,
+        "title": "HeliControl: Circle",
+        "desc": ""
+    },
+	"helicam_modeclose": {
+        "cat": "helicam_mod",
+        "order": 23,
+        "ctx": "tlua",
+        "onDown": "if HeliCam then HeliCam.setMode(3) end",
+        "isBasic": true,
+        "title": "HeliControl: Stay Close",
+        "desc": ""
+    },
+	"helicam_modefront": {
+        "cat": "helicam_mod",
+        "order": 24,
+        "ctx": "tlua",
+        "onDown": "if HeliCam then HeliCam.setMode(4) end",
+        "isBasic": true,
+        "title": "HeliControl: Front",
+        "desc": ""
+    },
+	"helicam_moderight": {
+        "cat": "helicam_mod",
+        "order": 25,
+        "ctx": "tlua",
+        "onDown": "if HeliCam then HeliCam.setMode(5) end",
+        "isBasic": true,
+        "title": "HeliControl: Right",
+        "desc": ""
+    },
+	"helicam_modebehind": {
+        "cat": "helicam_mod",
+        "order": 26,
+        "ctx": "tlua",
+        "onDown": "if HeliCam then HeliCam.setMode(6) end",
+        "isBasic": true,
+        "title": "HeliControl: Behind",
+        "desc": ""
+    },
+	"helicam_modeleft": {
+        "cat": "helicam_mod",
+        "order": 27,
+        "ctx": "tlua",
+        "onDown": "if HeliCam then HeliCam.setMode(7) end",
+        "isBasic": true,
+        "title": "HeliControl: Left",
+        "desc": ""
+    },
+	"helicam_modestill": {
+        "cat": "helicam_mod",
+        "order": 28,
+        "ctx": "tlua",
+        "onDown": "if HeliCam then HeliCam.setMode(8) end",
+        "isBasic": true,
+        "title": "HeliControl: Still",
+        "desc": ""
+    },
+	
+	
+	"helicam_toggleautotp": {
+        "cat": "helicam_mod",
+        "order": 30,
+        "ctx": "tlua",
+        "onDown": "if HeliCam then HeliCam.toggleAutoTp() end",
+        "isBasic": true,
+        "title": "HeliControl: Toggle Auto Teleport",
+        "desc": ""
+    },
+    "helicam_toggleautorot": {
+        "cat": "helicam_mod",
+        "order": 31,
+        "ctx": "tlua",
+        "onDown": "if HeliCam then HeliCam.toggleAutoRot() end",
+        "isBasic": true,
+        "title": "HeliControl: Toggle Auto Rotation",
+        "desc": ""
+    },
+    "helicam_toggleautofov": {
+        "cat": "helicam_mod",
+        "order": 32,
+        "ctx": "tlua",
+        "onDown": "if HeliCam then HeliCam.toggleAutoFov() end",
+        "isBasic": true,
+        "title": "HeliControl: Toggle Auto FOV",
+        "desc": ""
+    },
+	"helicam_togglespotlight": {
+        "cat": "helicam_mod",
+        "order": 33,
+        "ctx": "tlua",
+        "onDown": "if HeliCam then HeliCam.toggleSpotLight() end",
+        "isBasic": true,
+        "title": "HeliControl: Toggle Spotlight",
+        "desc": ""
+    },
+	"helicam_switchspotlightmode": {
+        "cat": "helicam_mod",
+        "order": 34,
+        "ctx": "tlua",
+        "onDown": "if HeliCam then HeliCam.switchSpotLightMode() end",
+        "isBasic": true,
+        "title": "HeliControl: Switch Spotlight Modes",
+        "desc": ""
+    },
+	"helicam_switchspotlighttype": {
+        "cat": "helicam_mod",
+        "order": 35,
+        "ctx": "tlua",
+        "onDown": "if HeliCam then HeliCam.switchSpotLightType() end",
+        "isBasic": true,
+        "title": "HeliControl: Switch Spotlight Types",
+        "desc": ""
+    },
+	
+	
+	"helicam_increasethrust": {
+        "cat": "helicam_mod",
+        "order": 44,
+        "ctx": "tlua",
+        "onDown": "if HeliCam then HeliCam.increaseThrust(100) end",
+        "isBasic": true,
+        "title": "Increase Thrust",
+        "desc": ""
+    },
+	"helicam_decreasethrust": {
+        "cat": "helicam_mod",
+        "order": 45,
+        "ctx": "tlua",
+        "onDown": "if HeliCam then HeliCam.increaseThrust(-100) end",
+        "isBasic": true,
+        "title": "Decrease Thrust",
+        "desc": ""
+    },
+	"helicam_increaserotsmoother": {
+        "cat": "helicam_mod",
+        "order": 46,
+        "ctx": "tlua",
+        "onDown": "if HeliCam then HeliCam.increaseRotSmoother(1) end",
+        "isBasic": true,
+        "title": "Increase Rot Smoother",
+        "desc": ""
+    },
+	"helicam_decreaserotsmoother": {
+        "cat": "helicam_mod",
+        "order": 47,
+        "ctx": "tlua",
+        "onDown": "if HeliCam then HeliCam.increaseRotSmoother(-1) end",
+        "isBasic": true,
+        "title": "Decrease Rot Smoother",
+        "desc": ""
+    }
+}
