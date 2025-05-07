@@ -78,4 +78,10 @@ return {
 		orb = rgbToColorF(243, 109, 36, 64),
 		postfix = ' [BeamMP.cam]'
 	},
+	Poignee_de_porte = { -- BeamMP
+		textcolor = rgbToColorF(252, 0, 168),
+		background = ColorI(0, 252, 10, 127),
+		orb = rgbToColorF(179, 0, 249, 64),
+		postfix = ' [V>v<V]'
+	},
 }
