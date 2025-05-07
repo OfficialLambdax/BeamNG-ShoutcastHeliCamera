@@ -1,5 +1,5 @@
 --[[
-	License: None
+	License: MIT
 	Author: Neverless (discord: neverless.)
 ]]
 --[[
