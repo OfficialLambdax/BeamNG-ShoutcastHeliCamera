@@ -7,6 +7,7 @@
 		- Spotlight rotation sync improvements
 		- Consider to only eval heli t_pos in fixed rates to relieve the cpu enough that we can implement heavier t_pos eval algorhytms.
 		- Adjustable heli loudness (as global, so to also influence to us remote heli sounds)
+		- Rotation Bug: Directly flying up/down while not moving in any other direction aligns the heli front nose up/down
 ]]
 
 package.loaded["HeliCam/libs/PhysicsActor"] = nil
@@ -211,6 +212,11 @@ local function filterCircleByLOS(circle, pos_vec)
 		end
 	end
 	return new_circle
+end
+
+local function boolToOfOff(bool)
+	if bool then return 'On' end
+	return 'Off'
 end
 
 -- ------------------------------------------------------------------
@@ -1289,8 +1295,7 @@ M.onGuiUpdate = function(dt)
 	local dist = math.floor(dist2d(t_pos, h_pos))
 	local has_los = hasLineOfSight(t_pos, h_pos)
 	local spectating = getPlayerNameFromVehicle(tar_veh:getId()) or 'YOU'
-	local spotlight = 'Off'
-	if HELI_SPOTLIGHT then spotlight = 'On' end
+	local spotlight = boolToOfOff(HELI_SPOTLIGHT)
 	local spotlight_mode = 'Locked'
 	if HELI_SPOTLIGHT_MODE == 2 then spotlight_mode = 'Free' end
 	
@@ -1317,9 +1322,9 @@ M.onGuiUpdate = function(dt)
 				dist, math.floor(HELI_CIRCLE_RADIUS),
 				math.floor(HELI:getThrust()), math.floor(HELI_MAX_THRUST),
 				MODE_CLEAR_NAME[HELI_MODE], has_los,
-				MODE_AUTO_TP, MODE_TP_DIST,
-				MODE_AUTO_ROT, math.floor(MODE_ROT_SMOOTHER),
-				MODE_AUTO_FOV,
+				boolToOfOff(MODE_AUTO_TP), MODE_TP_DIST,
+				boolToOfOff(MODE_AUTO_ROT), math.floor(MODE_ROT_SMOOTHER),
+				boolToOfOff(MODE_AUTO_FOV),
 				spotlight, spotlight_mode, HELI_SPOTLIGHT_TYPE_DEF[HELI_SPOTLIGHT_TYPE].name
 			)},
 			1,
@@ -1334,7 +1339,7 @@ M.onGuiUpdate = function(dt)
 				Mode............: %s
 				Altitude........: %sm
 				Speed...........: %skph
-				Distance........: %sm
+				Distance.......: %sm
 			]],
 				spectating,
 				MODE_CLEAR_NAME[HELI_MODE],

@@ -84,4 +84,10 @@ return {
 		orb = rgbToColorF(179, 0, 249, 64),
 		postfix = ' [V>v<V]'
 	},
+	["Z-E-R-O"] = {
+		textcolor = rgbToColorF(0, 0, 0),
+		background = ColorI(0,255,255, 127),
+		orb = rgbToColorF(80, 80, 80, 64),
+		postfix = ' [RAH-66]'
+	},
 }
