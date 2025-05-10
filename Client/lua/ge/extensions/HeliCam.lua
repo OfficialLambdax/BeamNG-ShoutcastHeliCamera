@@ -56,16 +56,6 @@ local HELI_CONTROL_INPUTS = {
 	altitude_down = 0
 }
 
---[[
-	1 = Direct/Hover. Aims at the targets x,y
-	2 = Circles. Aims to circle the target vehicle
-	3 = Closest in circle
-	4 = In front
-	5 = Right
-	6 = Behind
-	7 = Left
-	8 = Still
-]]
 local HELI_MODE = 2
 local MODE_CLEAR_NAME = {
 	[1] = 'Hover above Vehicle',
@@ -76,7 +66,6 @@ local MODE_CLEAR_NAME = {
 	[6] = 'Behind',
 	[7] = 'Left',
 	[8] = 'Still',
-	--[9] = 'Manual'
 }
 
 local MODE_AUTO_TP = true
@@ -102,6 +91,7 @@ local REMOTE_SEND_TIMER = hptimer()
 
 local IS_BEAMMP_SESSION = false
 local DEBUG_RENDER = false
+local MP_UPDATE_RATE = 250
 
 local INPUT_LOCK_PAYLOAD = [[
 	local function setInputLock(state)
@@ -262,7 +252,7 @@ local function updateCam(vehicle, dt)
 	
 	local tar_pos = vehicle:getPosition()
 	local cam_pos = HELI:getPosition()
-	cam_pos.z = cam_pos.z + 5
+	cam_pos.z = cam_pos.z - 1
 	local dist = dist3d(tar_pos, cam_pos)
 	local pre_pos
 	if simTimeAuthority.getPause() then
@@ -407,6 +397,7 @@ local function spawnHeli()
 	if not tar_veh then return end
 	
 	HELI:setPosition(tar_veh:getPosition() + vec3(0, 0, 20))
+	HELI:setVelocity(vec3(0, 0, 0))
 	IS_SPAWNED = true
 end
 
@@ -450,7 +441,6 @@ local function modeCircle(self, dt, tar_veh)
 		end
 		
 		--t_pos = circle[data.index]
-		--t_pos = evalPosWithLOSToTarget(circle[data.index], t_pos, v_pos)
 		t_pos = evalPosWithLOSToTarget(t_pos, circle[data.index], v_pos)
 		
 		if DEBUG_RENDER then
@@ -485,11 +475,6 @@ local function modeClosest(self, dt, tar_veh)
 	
 	if dist2d(t_pos, c_pos) < HELI_CIRCLE_RADIUS * 1.3 then
 		local circle = createCircle(t_pos, HELI_CIRCLE_RADIUS, 30)
-		--t_pos = evalPosWithLOSToTarget(
-		--	t_pos,
-		--	evalClosestFromCircle2D(circle, c_pos),
-		--	v_pos
-		--)
 		t_pos = findClosestFromCircleWithLOS2D(
 			circle,
 			t_pos,
@@ -641,19 +626,6 @@ local function modeStill(self, dt, tar_veh)
 	return v_pos, c_pos, c_vel, t_pos, t_vel
 end
 
-local function modeManual(self, dt, tar_veh)
-	-- heli
-	local c_pos = self:getPosition()
-	local c_vel = self:getVelocity()
-	
-	-- target
-	--local v_pos = tar_veh:getSpawnWorldOOBB():getCenter()
-	--local t_pos = evalTargetHeightPosHeli(c_pos)
-	--local t_vel = tar_veh:getVelocity()
-	
-	return v_pos, c_pos, c_vel, t_pos, t_vel
-end
-
 local AI_MODE_HANDLER = {
 	[1] = modeDirect,
 	[2] = modeCircle,
@@ -663,7 +635,6 @@ local AI_MODE_HANDLER = {
 	[6] = modeBehind,
 	[7] = modeLeft,
 	[8] = modeStill,
-	--[9] = modeManual,
 }
 local function switchToMode(mode)
 	HELI_MODE = mode
@@ -682,7 +653,6 @@ local function aiController(self, dt, tar_veh)
 	-- predict position of target
 	local r_vel = c_vel:length() - dir_to_t:dot(t_vel)
 	local p_pos = t_pos + (t_vel * dist / math.abs(r_vel))
-	--if p_pos.x == p_pos.x then p_pos = c_pos end -- if nan
 	if p_pos.x ~= p_pos.x then return end -- if nan
 	
 	-- create dir to intercept predicted position
@@ -801,13 +771,12 @@ end
 -- for local to remote send
 local function buildRemoteDataFromHeli(heli)
 	if not heli:isEnabled() then
-		--return '{"state":false}'
 		return '{"state":false,"player_id":1}'
 	end
 	
 	local data = heli:getData()
 	return jsonEncode({
-		player_id = 1, -- temp, set by server
+		player_id = 1, -- set by server, but required for sp dev
 		state = true,
 		spotlight = HELI_SPOTLIGHT,
 		spotlight_type = HELI_SPOTLIGHT_TYPE,
@@ -820,7 +789,6 @@ local function buildRemoteDataFromHeli(heli)
 end
 
 local function remoteAiController(self, dt, remote_data)
-	--print(remote_data.state)
 	local data = self:getData()
 	if data.spotlight_type ~= remote_data.spotlight_type then
 		data.spotlight_type = remote_data.spotlight_type
@@ -832,8 +800,7 @@ local function remoteAiController(self, dt, remote_data)
 end
 
 local function remotePhysicsController(self, dt, remote_data)
-	-- just because we stop our game doesnt mean that they did so we keep rendering it
-	--if simTimeAuthority.getPause() then return end
+	if simTimeAuthority.getPause() then return end
 	
 	local data_time = remote_data.timer:stop()
 	if data_time > 1000 then
@@ -924,14 +891,12 @@ local function spotLightRoutine(self, is_enabled, dt)
 	local t_dir = data.spotlight_dir -- what we want to point to
 	local c_dir = data.spotlight_dir_last -- where we are currently pointing to
 	
-	local s_dir = (t_dir - c_dir) * 6 * dt -- step rotate by this amount
+	local s_dir = (t_dir - c_dir) * 7 * dt -- step rotate by this amount
 	t_dir = c_dir + s_dir -- apply to current rot
 	data.spotlight_dir_last = t_dir
 	
 	local c_pos = self:getPositionAsRef()
 	local rot = quatFromDir(t_dir, vec3(0, 0, 1))
-	--c_pos = c_pos + (self:getVelocityAsRef():normalized() * 2.5)
-	--obj:setPosRot(c_pos.x, c_pos.y, c_pos.z + 4, rot.x, rot.y, rot.z, rot.w)
 	obj:setPosRot(c_pos.x, c_pos.y, c_pos.z, rot.x, rot.y, rot.z, rot.w)
 end
 
@@ -1019,7 +984,7 @@ local function nameTagRenderRoutine(self, is_enabled, dt)
 	data.textcolor.a = data.textcolor.a * fade
 	data.background.a = data.background.a * fade
 	
-	pos.z = pos.z + 10
+	pos.z = pos.z + 5
 	debugDrawer:drawTextAdvanced(
 		pos,
 		' ' .. player_name .. (nametag.postfix or PLAYER_TAG_DEFAULT_POSTFIX),
@@ -1062,7 +1027,8 @@ local function heliModelRenderRoutine(self, is_enabled, dt)
 	data.model_udir_last = u_dir
 	
 	local rot = quatFromDir(t_dir, u_dir)
-	obj:setPosRot(c_pos.x, c_pos.y, c_pos.z + 6, rot.x, rot.y, rot.z, rot.w)
+	local pos = c_pos + (t_dir * 2.5) -- moving the pos a little back so that spotlight and cam are closer to the front of the heli instead of on its belly
+	obj:setPosRot(pos.x, pos.y, pos.z, rot.x, rot.y, rot.z, rot.w)
 end
 
 -- ------------------------------------------------------------------
@@ -1072,7 +1038,7 @@ local function addDefaultObjects(heli, postfix)
 	obj.useInstanceRenderData = 1
 	obj.color = Point4F(1, 0.95, 0.5, 1)
 	obj.isEnabled = false
-	--obj:setField("flareType", 0, "vehicleHeadLightFlare") -- doesnt work quite as well
+	obj:setField("flareType", 0, "vehicleHeadLightFlare") -- doesnt work quite as well
 	obj.range = 500
 	obj.innerAngle = 4
 	obj.outerAngle = 7
@@ -1127,7 +1093,7 @@ local function createPlayerHeli()
 	data.spotlight_change = true
 	data.spotlight_dir = vec3(0, 0, 0)
 	data.spotlight_dir_last = vec3(0, 0, 0)
-	data.model_dir_last = vec3(0, 0, 0)
+	data.model_dir_last = vec3(-1, 0, 0)
 	data.model_udir_last = vec3(0, 0, 1)
 	
 	addDefaultObjects(heli, 'player')
@@ -1153,7 +1119,7 @@ local function createRemotePlayerHeli(player_id)
 	data.spotlight_change = true
 	data.spotlight_dir = vec3(0, 0, 0)
 	data.spotlight_dir_last = vec3(0, 0, 0)
-	data.model_dir_last = vec3(0, 0, 0)
+	data.model_dir_last = vec3(-1, 0, 0)
 	data.model_udir_last = vec3(0, 0, 1)
 	
 	addDefaultObjects(heli, player_id)
@@ -1177,7 +1143,6 @@ local function init()
 	obj.volume = 0
 	obj.is3D = false
 	obj:setField("sourceGroup", 0, "AudioChannelMaster")
-	--obj:setPosition(pos_vec or vec3(0, 0, -10000))
 	obj.referenceDistance = 50
 	obj.maxDistance = 500
 	obj:registerObject('helicam_player_view_sound')
@@ -1257,8 +1222,8 @@ M.onUpdate = function(dt_real, dt_sim, dt_real)
 			end
 		end
 		
-		if IS_BEAMMP_SESSION and REMOTE_SEND_TIMER:stop() > 250 then
-		--if REMOTE_SEND_TIMER:stop() > 250 then
+		if IS_BEAMMP_SESSION and REMOTE_SEND_TIMER:stop() > MP_UPDATE_RATE then
+		--if REMOTE_SEND_TIMER:stop() > MP_UPDATE_RATE then
 			REMOTE_SEND_TIMER:stopAndReset()
 			TriggerServerEvent('heliCamUpdate', buildRemoteDataFromHeli(HELI))
 			--M.receiveRemoteHeliData(buildRemoteDataFromHeli(HELI))
@@ -1287,17 +1252,20 @@ M.onGuiUpdate = function(dt)
 	if not tar_veh or not HELI or not IS_SPAWNED or not IS_CAM or not UI_RENDER then return end
 	
 	local t_pos = tar_veh:getPosition()
-	--local t_vel = math.floor(tar_veh:getVelocity():length() * 3.6)
 	local h_pos = HELI:getPosition()
 	local h_vel = math.floor(HELI:getVelocity():length() * 3.6)
 	local altitude_from_target = math.floor(h_pos.z - t_pos.z)
-	--local altitude = math.floor(surfaceHeight(h_pos))
 	local dist = math.floor(dist2d(t_pos, h_pos))
 	local has_los = hasLineOfSight(t_pos, h_pos)
 	local spectating = getPlayerNameFromVehicle(tar_veh:getId()) or 'YOU'
 	local spotlight = boolToOfOff(HELI_SPOTLIGHT)
 	local spotlight_mode = 'Locked'
 	if HELI_SPOTLIGHT_MODE == 2 then spotlight_mode = 'Free' end
+	local spotlight_def = HELI_SPOTLIGHT_TYPE_DEF[HELI_SPOTLIGHT_TYPE]
+	local spotlight_type = string.format(
+		'%s° %sm %s',
+		spotlight_def.outer, spotlight_def.range, spotlight_def.name
+	)
 	
 	if HELI_CONTROL then
 		guihooks.message({txt = string.format(
@@ -1314,7 +1282,8 @@ M.onGuiUpdate = function(dt)
 				Auto TP.........: %s (Dist > %sm)
 				Auto Rotate.: %s (Smoother: %s)
 				Auto Fov.......: %s
-				Spotlight......: %s (Mode: %s - Type: %s)
+				Spotlight......: %s (Mode: %s)
+				Spot. Type....: %s
 			]],
 				spectating,
 				altitude_from_target, math.floor(HELI_TARGET_ALT),
@@ -1325,7 +1294,8 @@ M.onGuiUpdate = function(dt)
 				boolToOfOff(MODE_AUTO_TP), MODE_TP_DIST,
 				boolToOfOff(MODE_AUTO_ROT), math.floor(MODE_ROT_SMOOTHER),
 				boolToOfOff(MODE_AUTO_FOV),
-				spotlight, spotlight_mode, HELI_SPOTLIGHT_TYPE_DEF[HELI_SPOTLIGHT_TYPE].name
+				spotlight, spotlight_mode,
+				spotlight_type
 			)},
 			1,
 			"helicam"
@@ -1410,9 +1380,16 @@ M.toggleCam = function()
 	M.toggleHeliControl(IS_CAM)
 	spawnHeli()
 	
-	if not IS_CAM and HELI_AUTO_DESPAWN then
-		M.despawnHeli()
+	if not IS_CAM then
+		core_camera.setVehicleCameraByIndexOffset(1) -- it be better if we switched to the last camera
+		if HELI_AUTO_DESPAWN then
+			M.despawnHeli()
+		end
 	end
+end
+
+M.spawnHeli = function()
+	spawnHeli()
 end
 
 M.despawnHeli = function()

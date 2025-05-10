@@ -1,6 +1,10 @@
+--[[
+	Try to not add strong spotlight to this. the 1.5 brightness is already strong.
+	Simple reason, its irritating for the players. Looks good for the heli, but sucks for the player.
+]]
 return {
 	[1] = {
-		name = 'Tight Cream',
+		name = 'Cream',
 		inner = 4,
 		outer = 7,
 		brightness = 1.5,
@@ -9,7 +13,7 @@ return {
 		shadows = nil,
 	},
 	[2] = {
-		name = 'Tight red',
+		name = 'Red',
 		inner = 4,
 		outer = 7,
 		brightness = 1.5,
@@ -18,7 +22,7 @@ return {
 		shadows = nil,
 	},
 	[3] = {
-		name = 'Tight Lime',
+		name = 'Lime',
 		inner = 4,
 		outer = 7,
 		brightness = 1.5,
@@ -27,7 +31,7 @@ return {
 		shadows = nil,
 	},
 	[4] = {
-		name = 'Tight Cyan',
+		name = 'Cyan',
 		inner = 4,
 		outer = 7,
 		brightness = 1.5,
@@ -36,7 +40,7 @@ return {
 		shadows = nil,
 	},
 	[5] = {
-		name = 'Tight Blue',
+		name = 'Blue',
 		inner = 4,
 		outer = 7,
 		brightness = 1.5,
@@ -45,7 +49,7 @@ return {
 		shadows = nil,
 	},
 	[6] = {
-		name = 'Tight Pink',
+		name = 'Pink',
 		inner = 4,
 		outer = 7,
 		brightness = 1.5,
@@ -53,60 +57,119 @@ return {
 		color = Point4F(1, 0.4, 0.7, 1),
 		shadows = nil,
 	},
+	
+	
 	[7] = {
-		name = 'Wide Cream',
+		name = 'Cream',
 		inner = 6,
 		outer = 9,
 		brightness = 1.5,
-		range = 500,
+		range = 300,
 		color = Point4F(1, 0.95, 0.5, 1),
 		shadows = nil,
 	},
 	[8] = {
-		name = 'Wide Red',
+		name = 'Red',
 		inner = 6,
 		outer = 9,
 		brightness = 1.5,
-		range = 500,
+		range = 300,
 		color = Point4F(1, 0.4, 0.4, 1),
 		shadows = nil,
 	},
 	[9] = {
-		name = 'Wide Lime',
+		name = 'Lime',
 		inner = 6,
 		outer = 9,
 		brightness = 1.5,
-		range = 500,
+		range = 300,
 		color = Point4F(0.8, 1, 0.4, 1),
 		shadows = nil,
 	},
 	[10] = {
-		name = 'Wide Cyan',
+		name = 'Cyan',
 		inner = 6,
 		outer = 9,
 		brightness = 1.5,
-		range = 500,
+		range = 300,
 		color = Point4F(0.4, 1, 0.8, 1),
 		shadows = nil,
 	},
 	[11] = {
-		name = 'Wide Blue',
+		name = 'Blue',
 		inner = 6,
 		outer = 9,
 		brightness = 1.5,
-		range = 500,
+		range = 300,
 		color = Point4F(0.4, 0.5, 1, 1),
 		shadows = nil,
 	},
 	[12] = {
-		name = 'Wide Pink',
+		name = 'Pink',
 		inner = 6,
 		outer = 9,
 		brightness = 1.5,
-		range = 500,
+		range = 300,
+		color = Point4F(1, 0.4, 0.7, 1),
+		shadows = nil,
+	},
+	
+	
+	[13] = {
+		name = 'Cream',
+		inner = 10,
+		outer = 25,
+		brightness = 1.5,
+		range = 200,
+		color = Point4F(1, 0.95, 0.5, 1),
+		shadows = nil,
+	},
+	[14] = {
+		name = 'Red',
+		inner = 10,
+		outer = 25,
+		brightness = 1.5,
+		range = 200,
+		color = Point4F(1, 0.4, 0.4, 1),
+		shadows = nil,
+	},
+	[15] = {
+		name = 'Lime',
+		inner = 10,
+		outer = 25,
+		brightness = 1.5,
+		range = 200,
+		color = Point4F(0.8, 1, 0.4, 1),
+		shadows = nil,
+	},
+	[16] = {
+		name = 'Cyan',
+		inner = 10,
+		outer = 25,
+		brightness = 1.5,
+		range = 200,
+		color = Point4F(0.4, 1, 0.8, 1),
+		shadows = nil,
+	},
+	[17] = {
+		name = 'Blue',
+		inner = 10,
+		outer = 25,
+		brightness = 1.5,
+		range = 200,
+		color = Point4F(0.4, 0.5, 1, 1),
+		shadows = nil,
+	},
+	[18] = {
+		name = 'Pink',
+		inner = 10,
+		outer = 25,
+		brightness = 1.5,
+		range = 200,
 		color = Point4F(1, 0.4, 0.7, 1),
 		shadows = nil,
 	}
+	
 	--[x] = {
 	--	name = '',
 	--	inner = 6,
