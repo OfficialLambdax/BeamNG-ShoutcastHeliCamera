@@ -19,7 +19,7 @@ local SpotlightTypes = require("HeliCam/defs/SpotlightTypes")
 
 local M = {}
 
-local VERSION = '0.3' -- 12.05.2025 (DD.MM.YYYY)
+local VERSION = '0.4' -- 12.05.2025 (DD.MM.YYYY)
 
 local CAM_NAME = 'helicam'
 local SPECTATE_SOUND
@@ -69,6 +69,7 @@ local MODE_CLEAR_NAME = {
 	[6] = 'Behind',
 	[7] = 'Left',
 	[8] = 'Still',
+	--[9] = 'Trajectory',
 }
 
 local MODE_AUTO_TP = true
@@ -211,6 +212,14 @@ local function boolToOnOff(bool)
 	return 'Off'
 end
 
+-- This isnt fully functional
+-- https://gamedev.stackexchange.com/questions/69649/using-atan2-to-calculate-angle-between-two-vectors
+local function dirAngle(dir_vec1, dir_vec2)
+    return math.acos(dir_vec1:dot(dir_vec2))
+    --return math.abs(math.atan2(dir_vec1.y, dir_vec1.x) - math.atan2(dir_vec2.y, dir_vec2.x))
+    --return math.acos(dir_vec1:dot(dir_vec2) / (dir_vec1:length() * dir_vec2:length()))
+end
+
 -- ------------------------------------------------------------------
 -- MP Stuff
 local function isBeamMPSession()
@@ -260,10 +269,25 @@ local function updateCam(vehicle, dt)
 	if simTimeAuthority.getPause() then
 		pre_pos = tar_pos
 	else
+		--[[
 		local tar_vel = vehicle:getVelocity()
 		local speed_factor = math.min(1, tar_vel:length() / 5)
-		local dist_factor = 0.6 - clamp((dist / 20) * 0.05, 0, 0.4)
+		local dist_factor = 0.5 - clamp((dist / 20) * 0.035, 0, 0.35)
 		pre_pos = tar_pos + (speed_factor * (tar_vel * dist_factor))
+		]]
+		
+		-- Essentially: Aim at a pos in front of the vehicle. The closer we are to the vehicle the further but only if the angle between vel dir and cam dir to veh dir is small. or in other words: aim ahead if we are behind vehicle, aim only half as much ahead if we are at the side, dont aim ahead at all if we are ahead of vehicle)
+		local tar_vel = vehicle:getVelocity()
+		local vel_dir = tar_vel:normalized()
+		local speed = tar_vel:length()
+		--local speed_factor = math.min(1, speed / 5)
+		local speed_factor = clamp(speed / 5, 0, 1)
+		local dist_factor = 0
+		if dist < 60 and speed > 2 then
+			local dir_dif = 2 - clamp(dirAngle(vel_dir, (tar_pos - cam_pos):normalized()), 0, 2)
+			dist_factor = (3 - clamp((dist / 60) * 3, 0, 3)) * dir_dif
+		end
+		pre_pos = tar_pos + (vel_dir * 5 * (speed_factor + dist_factor))
 	end
 	
 	core_camera:setPosition(cam_pos)
@@ -635,6 +659,44 @@ local function modeStill(self, dt, tar_veh)
 	return v_pos, c_pos, c_vel, t_pos, t_vel
 end
 
+-- bollocks
+--[[
+local function modeTrajectory(self, dt, tar_veh)
+	-- heli
+	local c_pos = self:getPosition()
+	local c_vel = self:getVelocity()
+	
+	-- target
+	local v_pos = tar_veh:getSpawnWorldOOBB():getCenter()
+	
+	local data = self:getData()
+	local trajectory = data.trajectory
+	if data.trajectory_timer:stop() > 150 or #trajectory == 0 then
+		data.trajectory_timer:stopAndReset()
+		for index = #trajectory, 1, -1 do
+			trajectory[index + 1] = trajectory[index]
+		end
+		if #trajectory == 6 then trajectory[6] = nil end
+		trajectory[1] = {
+			pos = evalTargetHeightPos(tar_veh:getSpawnWorldOOBB():getCenter()),
+			vel = tar_veh:getVelocity()
+		}
+	end
+	
+	local t_pos = trajectory[#trajectory].pos
+	local t_vel = (trajectory[#trajectory - 1] or {}).vel or tar_veh:getVelocity()
+	
+	if DEBUG_RENDER then
+		for _, pos in ipairs(trajectory) do
+			debugDrawer:drawSphere(pos.pos, 1, ColorF(0, 1, 0, 1))
+		end
+		debugDrawer:drawSphere(t_pos, 2, ColorF(0, 0, 1, 1))
+	end
+	
+	return v_pos, c_pos, c_vel, t_pos, t_vel
+end
+]]
+
 local AI_MODE_HANDLER = {
 	[1] = modeDirect,
 	[2] = modeCircle,
@@ -644,6 +706,7 @@ local AI_MODE_HANDLER = {
 	[6] = modeBehind,
 	[7] = modeLeft,
 	[8] = modeStill,
+	--[9] = modeTrajectory,
 }
 local function switchToMode(mode)
 	HELI_MODE = mode
@@ -1098,6 +1161,8 @@ local function createPlayerHeli()
 	data.textcolor = ColorF(0, 0, 0, 0)
 	data.background = ColorI(0, 0, 0, 0)
 	data.los_timer = hptimer()
+	--data.trajectory = {}
+	--data.trajectory_timer = hptimer()
 	data.spotlight_type = 1
 	data.spotlight_change = true
 	data.spotlight_dir = vec3(0, 0, 0)
