@@ -6,6 +6,8 @@ local function inRange(x, t, y)
 end
 
 function C:init(fov_default, fov_min, fov_max)
+	self.isFilter = true
+	self.hidden = true
 	self.fov_default = fov_default or 80
 	self.fov_min = fov_min or 10
 	self.fov_max = fov_max or 120

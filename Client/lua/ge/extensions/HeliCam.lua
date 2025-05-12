@@ -27,11 +27,12 @@ local SPECTATE_SOUND
 local IS_SPAWNED = false
 local IS_CAM = false
 local UI_RENDER = true
+local DEBUG_RENDER = false
 
 local HELI
 local HELI_MASS = 100
 local HELI_MAX_THRUST = 1500
-local HELI_BRAKE_DIST = 350 -- m
+local HELI_BRAKE_DIST = 400 -- m
 local HELI_MAX_SPEED = 100 -- ms
 local HELI_MAX_THROTTLE_RANGE = 5 -- ms
 local HELI_TARGET_ALT = 150
@@ -92,7 +93,6 @@ local REMOTE_HELIS = {}
 local REMOTE_SEND_TIMER = hptimer()
 
 local IS_BEAMMP_SESSION = false
-local DEBUG_RENDER = false
 local MP_UPDATE_RATE = 250
 
 local INPUT_LOCK_PAYLOAD = [[
@@ -279,6 +279,11 @@ local function updateCam(vehicle, dt)
 			t_dir,
 			vec3(0, 0, 1)
 		))
+		
+		if DEBUG_RENDER then
+			debugDrawer:drawSphere(pre_pos, 1, ColorF(0, 0, 1, 1))
+			debugDrawer:drawText(pre_pos + vec3(0, 0, 2), 'Cam target', ColorF(0, 0, 1, 1))
+		end
 	end
 	if MODE_AUTO_FOV then
 		local fov = math.max(0, 40 - ((dist / 200) * 40))
@@ -1208,13 +1213,6 @@ end
 -- ------------------------------------------------------------------
 -- Game events
 M.onUpdate = function(dt_real, dt_sim, dt_real)
-
-	--local dist = dist3d(core_camera:getPosition(), getPlayerVehicle(0):getPosition())
-	--local fov = math.max(0, 60 - ((dist / 300) * 60))
-	--core_camera:setFOV(fov)
-	--dump(fov)
-
-
 	if not HELI then return end
 	HELI:setState(IS_SPAWNED)
 
