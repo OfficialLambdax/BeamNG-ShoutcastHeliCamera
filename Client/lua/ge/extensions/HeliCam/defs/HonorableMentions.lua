@@ -90,4 +90,10 @@ return {
 		orb = rgbToColorF(80, 80, 80, 64),
 		postfix = ' [RAH-66]'
 	},
+	DaddelZeit = {
+		textcolor = rgbToColorF(200, 0, 0),
+		background = ColorI(255, 255, 255, 127),
+		orb = rgbToColorF(255, 255, 255, 127),
+		postfix = ' [o7]'
+	},
 }
