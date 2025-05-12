@@ -6,7 +6,7 @@
 	This is a copy of the free.lua game camera.
 	Modifications
 		- smooth cam is forced
-		- uses a edited manualzoom.lua that doesnt display fov changs to the ui
+		- uses a custom manualzoom.lua that doesnt display fov changs to the ui and smoothly changes fov from inputs
 ]]
 
 local C = {}
@@ -76,7 +76,7 @@ function C:setPosition(position)
 end
 
 function C:setFOV(fovDeg)
-  self.manualzoom:init(fovDeg)
+  self.manualzoom:setFOV(fovDeg)
 end
 
 function C:setNewtonRotation(enabled)

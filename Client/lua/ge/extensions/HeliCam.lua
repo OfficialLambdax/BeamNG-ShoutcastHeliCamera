@@ -19,6 +19,8 @@ local SpotlightTypes = require("HeliCam/defs/SpotlightTypes")
 
 local M = {}
 
+local VERSION = '0.3' -- 12.05.2025 (DD.MM.YYYY)
+
 local CAM_NAME = 'helicam'
 local SPECTATE_SOUND
 
@@ -29,7 +31,7 @@ local UI_RENDER = true
 local HELI
 local HELI_MASS = 100
 local HELI_MAX_THRUST = 1500
-local HELI_BRAKE_DIST = 400 -- m
+local HELI_BRAKE_DIST = 350 -- m
 local HELI_MAX_SPEED = 100 -- ms
 local HELI_MAX_THROTTLE_RANGE = 5 -- ms
 local HELI_TARGET_ALT = 150
@@ -204,7 +206,7 @@ local function filterCircleByLOS(circle, pos_vec)
 	return new_circle
 end
 
-local function boolToOfOff(bool)
+local function boolToOnOff(bool)
 	if bool then return 'On' end
 	return 'Off'
 end
@@ -259,8 +261,9 @@ local function updateCam(vehicle, dt)
 		pre_pos = tar_pos
 	else
 		local tar_vel = vehicle:getVelocity()
-		local factor = math.min(1, tar_vel:length() / 5)
-		pre_pos = tar_pos + (factor * (tar_vel * 0.1))
+		local speed_factor = math.min(1, tar_vel:length() / 5)
+		local dist_factor = 0.6 - clamp((dist / 20) * 0.05, 0, 0.4)
+		pre_pos = tar_pos + (speed_factor * (tar_vel * dist_factor))
 	end
 	
 	core_camera:setPosition(cam_pos)
@@ -278,7 +281,8 @@ local function updateCam(vehicle, dt)
 		))
 	end
 	if MODE_AUTO_FOV then
-		core_camera:setFOV(math.max(0, 40 - (dist / 2)))
+		local fov = math.max(0, 40 - ((dist / 200) * 40))
+		core_camera:setFOV(fov)
 	end
 end
 
@@ -1204,6 +1208,13 @@ end
 -- ------------------------------------------------------------------
 -- Game events
 M.onUpdate = function(dt_real, dt_sim, dt_real)
+
+	--local dist = dist3d(core_camera:getPosition(), getPlayerVehicle(0):getPosition())
+	--local fov = math.max(0, 60 - ((dist / 300) * 60))
+	--core_camera:setFOV(fov)
+	--dump(fov)
+
+
 	if not HELI then return end
 	HELI:setState(IS_SPAWNED)
 
@@ -1258,7 +1269,7 @@ M.onGuiUpdate = function(dt)
 	local dist = math.floor(dist2d(t_pos, h_pos))
 	local has_los = hasLineOfSight(t_pos, h_pos)
 	local spectating = getPlayerNameFromVehicle(tar_veh:getId()) or 'YOU'
-	local spotlight = boolToOfOff(HELI_SPOTLIGHT)
+	local spotlight = boolToOnOff(HELI_SPOTLIGHT)
 	local spotlight_mode = 'Locked'
 	if HELI_SPOTLIGHT_MODE == 2 then spotlight_mode = 'Free' end
 	local spotlight_def = HELI_SPOTLIGHT_TYPE_DEF[HELI_SPOTLIGHT_TYPE]
@@ -1270,7 +1281,7 @@ M.onGuiUpdate = function(dt)
 	if HELI_CONTROL then
 		guihooks.message({txt = string.format(
 			[[
-				HELI CAM ACTIVE - %s
+				HELI CAM V%s - %s
 				HELI CONTROL MODE! VEHICLE CONTROLS LOCKED
 				---------------------._ Settings _.----------------------
 				Altitude........: %sm (Target: %sm)
@@ -1281,19 +1292,19 @@ M.onGuiUpdate = function(dt)
 				Mode............: %s (LOS: %s)
 				Auto TP.........: %s (Dist > %sm)
 				Auto Rotate.: %s (Smoother: %s)
-				Auto Fov.......: %s
+				Auto Fov.......: %s (FOV: %s)
 				Spotlight......: %s (Mode: %s)
 				Spot. Type....: %s
 			]],
-				spectating,
+				VERSION, spectating,
 				altitude_from_target, math.floor(HELI_TARGET_ALT),
 				h_vel, math.floor(HELI_MAX_SPEED * 3.6),
 				dist, math.floor(HELI_CIRCLE_RADIUS),
 				math.floor(HELI:getThrust()), math.floor(HELI_MAX_THRUST),
 				MODE_CLEAR_NAME[HELI_MODE], has_los,
-				boolToOfOff(MODE_AUTO_TP), MODE_TP_DIST,
-				boolToOfOff(MODE_AUTO_ROT), math.floor(MODE_ROT_SMOOTHER),
-				boolToOfOff(MODE_AUTO_FOV),
+				boolToOnOff(MODE_AUTO_TP), MODE_TP_DIST,
+				boolToOnOff(MODE_AUTO_ROT), math.floor(MODE_ROT_SMOOTHER),
+				boolToOnOff(MODE_AUTO_FOV), math.floor(core_camera:getFovDeg()),
 				spotlight, spotlight_mode,
 				spotlight_type
 			)},
@@ -1303,7 +1314,7 @@ M.onGuiUpdate = function(dt)
 	else
 		guihooks.message({txt = string.format(
 			[[
-				HELI CAM ACTIVE - %s
+				HELI CAM V%s - %s
 				VEHICLE CONTROL MODE! Limited heli control
 				------------------------._ State _.------------------------
 				Mode............: %s
@@ -1311,7 +1322,7 @@ M.onGuiUpdate = function(dt)
 				Speed...........: %skph
 				Distance.......: %sm
 			]],
-				spectating,
+				VERSION, spectating,
 				MODE_CLEAR_NAME[HELI_MODE],
 				altitude_from_target,
 				h_vel,

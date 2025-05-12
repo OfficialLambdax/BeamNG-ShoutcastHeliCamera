@@ -1,43 +1,56 @@
--- This Source Code Form is subject to the terms of the bCDDL, v. 1.1.
--- If a copy of the bCDDL was not distributed with this
--- file, You can obtain one at http://beamng.com/bCDDL-1.1.txt
-
 local C = {}
 C.__index = C
 
-function C:init(fovDefault, fovMin, fovMax, uiTxt)
-  self.isFilter = true
-  self.hidden = true
-  self.fovDefault = fovDefault or 80
-  self.fovMin = fovMin or 10
-  self.fovMax = fovMax or 120
-  self.uiTxt = uiTxt or "ui.camera.fov"
-  self:reset()
+local function inRange(x, t, y)
+	return t > x and t < y
+end
+
+function C:init(fov_default, fov_min, fov_max)
+	self.fov_default = fov_default or 80
+	self.fov_min = fov_min or 10
+	self.fov_max = fov_max or 120
+	self.accel = 0
+	self:reset()
 end
 
 function C:reset()
-  self.fov = self.fovDefault
+	self.fov = self.fov_default
+	self.accel = 0
+end
+
+function C:setFOV(fov)
+	self.fov = fov
+	self.accel = 0
 end
 
 function C:update(data)
-  if data.openxrSessionRunning then return false end
-  local fovDelta = 4.5*data.dt*(MoveManager.zoomIn - MoveManager.zoomOut) * self.fov
-  local fov = clamp(self.fov + fovDelta, self.fovMin, self.fovMax)
-  local mustNotifyFov = round(fov*10) ~= round((self.lastNotifiedFov or self.fov) * 10)
-  --if mustNotifyFov then
-  --  self.lastNotifiedFov = fov
-   -- ui_message({txt=self.uiTxt, context={degrees=fov}}, 2, 'cameramode')
-  --end
-  self.fov = fov
-  data.res.fov = self.fov
-  return mustNotifyFov
+	if data.openxrSessionRunning then return false end
+	local input = MoveManager.zoomIn - MoveManager.zoomOut -- -0.1 to 0.1. unsure if this is true with all input controllers, but it is for keyboard
+	local accel = self.accel
+	
+	-- if input matches accel dir then accel, otherwise brake
+	if (input > 0 and accel >= 0) or (input < 0 and accel <= 0) then
+		accel = accel + (input * 1 * data.dt)
+		
+	elseif accel < 0 or accel > 0 then
+		local dir = -1
+		if accel < 0 then dir = 1 end
+		
+		local step = 0.3 * data.dt * dir
+		accel = accel + step
+		if inRange(-step, accel, step) then accel = 0 end
+	end
+	
+	self.accel = clamp(accel, -1, 1)
+	self.fov = clamp(self.fov + self.accel, self.fov_min, self.fov_max)
+	data.res.fov = self.fov
 end
 
--- DO NOT CHANGE CLASS IMPLEMENTATION BELOW
 
+-- DO NOT CHANGE CLASS IMPLEMENTATION BELOW
 return function(...)
-  local o = ... or {}
-  setmetatable(o, C)
-  o:init()
-  return o
+	local o = ... or {}
+	setmetatable(o, C)
+	o:init()
+	return o
 end
