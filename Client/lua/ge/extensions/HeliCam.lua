@@ -1417,22 +1417,7 @@ M.receiveRemoteHeliData = function(remote_data)
 end
 
 -- ------------------------------------------------------------------
--- Player tag api
-M.setPlayertag = function(player_name, textcolor, background, postfix, orb)
-	PLAYER_TAGS[player_name] = {
-		textcolor = textcolor or rgbToColorF(255, 255, 255), -- must be ColorF where rgba go from 0 to 1
-		background = background or ColorI(255, 255, 255, 127), -- must be ColorI
-		postfix = postfix or ' [Heli]',
-		orb = orb or rgbToColorF(122, 122, 122, 64) -- must be ColorF
-	}
-end
-
-M.removePlayertag = function(player_name)
-	PLAYER_TAGS[player_name] = nil
-end
-
--- ------------------------------------------------------------------
--- Custom events
+-- Custom events / Hotkeys
 M.toggleAnim = function() -- testing
 	local obj = HELI:getObjByName('model')
 	obj.playAmbient = not obj.playAmbient
@@ -1449,8 +1434,8 @@ M.toggleHeliControl = function(state)
 	switchHeliControl(HELI_CONTROL)
 end
 
-M.toggleCam = function()
-	IS_CAM = not IS_CAM
+M.toggleCam = function(state)
+	IS_CAM = state or not IS_CAM
 	M.toggleHeliControl(IS_CAM)
 	spawnHeli()
 	
@@ -1539,5 +1524,77 @@ M.increaseRotSmoother = function(amount)
 	if not IS_CAM or not HELI_CONTROL then return end
 	increaseRotSmoother(tonumber(amount) or 0)
 end
+
+-- ------------------------------------------------------------------
+-- API
+M.setPlayertag = function(player_name, textcolor, background, postfix, orb)
+	PLAYER_TAGS[player_name] = {
+		textcolor = textcolor or rgbToColorF(255, 255, 255), -- must be ColorF where rgba go from 0 to 1
+		background = background or ColorI(255, 255, 255, 127), -- must be ColorI
+		postfix = postfix or ' [Heli]',
+		orb = orb or rgbToColorF(122, 122, 122, 64) -- must be ColorF
+	}
+end
+
+M.removePlayertag = function(player_name)
+	PLAYER_TAGS[player_name] = nil
+end
+
+M.setAllInOne = function(veh_id, mode, height, radius, teleport)
+	local vehicle = getObjectByID(veh_id)
+	if not vehicle then return end
+	
+	be:enterVehicle(0, vehicle)
+	spawnHeli()
+	M.toggleCam(true)
+	
+	if mode then M.setMode(mode) end
+	if height then M.setAltitude(height) end
+	if radius then M.setRadius(radius) end
+	if teleport then M.teleport() end
+end
+
+M.setMode = function(mode) -- int. See MODE_CLEAR_NAME table
+	switchToMode(mode or 1)
+end
+
+M.setTarget = function(veh_id)
+	local vehicle = getObjectByID(veh_id)
+	if not vehicle then return end
+	be:enterVehicle(0, vehicle)
+end
+
+M.teleport = function(pos)
+	HELI:setPosition(
+		evalTargetHeightPos(
+			pos or getPlayerVehicle(0):getPosition() or vec3(0, 0, 0)
+		)
+	)
+	M.setVelocity()
+end
+
+M.setVelocity = function(vel)
+	HELI:setVelocity(vel or vec3(0, 0, 0))
+end
+
+M.setAltitude = function(height)
+	HELI_TARGET_ALT = height
+end
+
+M.setRadius = function(radius)
+	HELI_CIRCLE_RADIUS = radius
+end
+
+M.setThrust = function(thrust)
+	HELI_MAX_THRUST = thrust
+end
+
+M.setRotSmoother = function(smoother)
+	MODE_ROT_SMOOTHER = smoother
+end
+
+-- raw access to the Heli physics obj.
+-- Please see HeliCam/libs/PhysicsActor.lua for the interface
+M.HELI = HELI
 
 return M
