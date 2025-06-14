@@ -1466,33 +1466,33 @@ M.setMode = function(mode)
 	switchToMode(math.max(1, tonumber(mode) or 1))
 end
 
-M.toggleAutoRot = function()
+M.toggleAutoRot = function(state)
 	if not IS_CAM or not HELI_CONTROL then return end
-	MODE_AUTO_ROT = not MODE_AUTO_ROT
+	MODE_AUTO_ROT = state or not MODE_AUTO_ROT
 end
 
-M.toggleAutoFov = function()
+M.toggleAutoFov = function(state)
 	if not IS_CAM or not HELI_CONTROL then return end
-	MODE_AUTO_FOV = not MODE_AUTO_FOV
+	MODE_AUTO_FOV = state or not MODE_AUTO_FOV
 end
 
-M.toggleAutoTp = function()
-	MODE_AUTO_TP = not MODE_AUTO_TP
+M.toggleAutoTp = function(state)
+	MODE_AUTO_TP = state or not MODE_AUTO_TP
 end
 
-M.toggleDebugDraw = function()
+M.toggleDebugDraw = function(state)
 	if not IS_CAM or not HELI_CONTROL then return end
-	DEBUG_RENDER = not DEBUG_RENDER
+	DEBUG_RENDER = state or not DEBUG_RENDER
 end
 
-M.toggleUiRender = function()
+M.toggleUiRender = function(state)
 	if not IS_CAM then return end
-	UI_RENDER = not UI_RENDER
+	UI_RENDER = state or not UI_RENDER
 end
 
-M.toggleSpotLight = function()
+M.toggleSpotLight = function(state)
 	if not IS_CAM or not HELI_CONTROL then return end
-	HELI_SPOTLIGHT = not HELI_SPOTLIGHT
+	HELI_SPOTLIGHT = state or not HELI_SPOTLIGHT
 end
 
 M.switchSpotLightMode = function()
