@@ -19,7 +19,7 @@ local SpotlightTypes = require("HeliCam/defs/SpotlightTypes")
 
 local M = {}
 
-local VERSION = '0.4' -- 12.05.2025 (DD.MM.YYYY)
+local VERSION = '0.5' -- 16.06.2025 (DD.MM.YYYY)
 
 local CAM_NAME = 'helicam'
 local SPECTATE_SOUND
@@ -104,8 +104,17 @@ local INPUT_LOCK_PAYLOAD = [[
 	end;
 ]]
 
+local SPECTATOR_WHITELIST_VEHICLES = {}
+local SPECTATOR_WHITELIST_PLAYERS = {}
+
+
 -- ------------------------------------------------------------------
 -- Common
+local function boolOr(bool, var)
+	if type(bool) == "boolean" then return bool end
+	return var
+end
+
 local function vec2Array(vec)
 	return {vec.x, vec.y, vec.z}
 end
@@ -220,6 +229,18 @@ local function dirAngle(dir_vec1, dir_vec2)
     --return math.acos(dir_vec1:dot(dir_vec2) / (dir_vec1:length() * dir_vec2:length()))
 end
 
+local function tableVToK(table)
+	local new_table = {}
+	for _, v in pairs(table) do
+		new_table[v] = true
+	end
+	return new_table
+end
+
+local function tableHasContent(table)
+	return #({next(table)}) > 0
+end
+
 -- ------------------------------------------------------------------
 -- MP Stuff
 local function isBeamMPSession()
@@ -247,6 +268,57 @@ end
 local function isOwn(game_vehicle_id)
 	if not IS_BEAMMP_SESSION then return true end
 	return MPVehicleGE.isOwn(game_vehicle_id)
+end
+
+-- ------------------------------------------------------------------
+-- Spectator whitelist stuff
+local function evalValidSpectatedVehicles() -- produces duplicates
+	local vehicles = {}
+	for veh_id, _ in pairs(SPECTATOR_WHITELIST_VEHICLES) do
+		local vehicle = getObjectByID(veh_id)
+		if not vehicle then
+			SPECTATOR_WHITELIST_VEHICLES[veh_id] = nil
+		else
+			table.insert(vehicles, vehicle)
+		end
+	end
+	
+	if IS_BEAMMP_SESSION then
+		for player_name, _ in pairs(SPECTATOR_WHITELIST_PLAYERS) do
+			for _, veh_data in pairs(MPVehicleGE.getPlayerByName(player_name).vehicles) do
+				local vehicle = getObjectByID(veh_data.gameVehicleID)
+				if vehicle then
+					table.insert(vehicles, vehicle)
+				end
+			end
+		end
+	end
+	
+	return vehicles
+end
+
+local function evalSpectatorShip()
+	local change = false
+	local vehicle = getPlayerVehicle(0)
+	if not vehicle then
+		change = true
+		
+	else
+		if tableHasContent(SPECTATOR_WHITELIST_VEHICLES) then
+			change = SPECTATOR_WHITELIST_VEHICLES[vehicle:getId()] == nil
+		end
+		if not change and IS_BEAMMP_SESSION and tableHasContent(SPECTATOR_WHITELIST_PLAYERS) then
+			change = SPECTATOR_WHITELIST_PLAYERS[getPlayerNameFromVehicle(vehicle:getId())] == nil
+		end
+	end
+	
+	if change then
+		local valid_vehicles = evalValidSpectatedVehicles()
+		if tableHasContent(valid_vehicles) then
+			local random = valid_vehicles[math.random(1, #valid_vehicles)]
+			be:enterVehicle(0, random)
+		end
+	end
 end
 
 -- ------------------------------------------------------------------
@@ -1241,6 +1313,9 @@ local function unload()
 	end
 	REMOTE_HELIS = {}
 	
+	SPECTATOR_WHITELIST_VEHICLES = {}
+	SPECTATOR_WHITELIST_PLAYERS = {}
+	
 	IS_SPAWNED = false
 	IS_CAM = false
 	HELI_CONTROL = false
@@ -1277,6 +1352,11 @@ end
 
 -- ------------------------------------------------------------------
 -- Game events
+M.onVehicleSwitched = function(prev_vehicle, vehicle)
+	if not IS_CAM then return end
+	evalSpectatorShip()
+end
+
 M.onUpdate = function(dt_real, dt_sim, dt_real)
 	if not HELI then return end
 	HELI:setState(IS_SPAWNED)
@@ -1430,12 +1510,12 @@ end
 
 M.toggleHeliControl = function(state)
 	if not HELI_CONTROL and not IS_CAM then return end
-	HELI_CONTROL = state or not HELI_CONTROL
+	HELI_CONTROL = boolOr(state, not HELI_CONTROL)
 	switchHeliControl(HELI_CONTROL)
 end
 
 M.toggleCam = function(state)
-	IS_CAM = state or not IS_CAM
+	IS_CAM = boolOr(state, not IS_CAM)
 	M.toggleHeliControl(IS_CAM)
 	spawnHeli()
 	
@@ -1454,6 +1534,7 @@ end
 M.despawnHeli = function()
 	IS_CAM = false
 	IS_SPAWNED = false
+	switchHeliControl(false)
 end
 
 M.nextMode = function()
@@ -1468,31 +1549,31 @@ end
 
 M.toggleAutoRot = function(state)
 	if not IS_CAM or not HELI_CONTROL then return end
-	MODE_AUTO_ROT = state or not MODE_AUTO_ROT
+	MODE_AUTO_ROT = boolOr(state, not MODE_AUTO_ROT)
 end
 
 M.toggleAutoFov = function(state)
 	if not IS_CAM or not HELI_CONTROL then return end
-	MODE_AUTO_FOV = state or not MODE_AUTO_FOV
+	MODE_AUTO_FOV = boolOr(state, not MODE_AUTO_FOV)
 end
 
 M.toggleAutoTp = function(state)
-	MODE_AUTO_TP = state or not MODE_AUTO_TP
+	MODE_AUTO_TP = boolOr(state, not MODE_AUTO_TP)
 end
 
 M.toggleDebugDraw = function(state)
 	if not IS_CAM or not HELI_CONTROL then return end
-	DEBUG_RENDER = state or not DEBUG_RENDER
+	DEBUG_RENDER = boolOr(state, not DEBUG_RENDER)
 end
 
 M.toggleUiRender = function(state)
 	if not IS_CAM then return end
-	UI_RENDER = state or not UI_RENDER
+	UI_RENDER = boolOr(state, not UI_RENDER)
 end
 
 M.toggleSpotLight = function(state)
 	if not IS_CAM or not HELI_CONTROL then return end
-	HELI_SPOTLIGHT = state or not HELI_SPOTLIGHT
+	HELI_SPOTLIGHT = boolOr(state, not HELI_SPOTLIGHT)
 end
 
 M.switchSpotLightMode = function()
@@ -1567,7 +1648,7 @@ end
 M.teleport = function(pos)
 	HELI:setPosition(
 		evalTargetHeightPos(
-			pos or getPlayerVehicle(0):getPosition() or vec3(0, 0, 0)
+			pos or getPlayerVehicle(0):getPosition()
 		)
 	)
 	M.setVelocity()
@@ -1591,6 +1672,17 @@ end
 
 M.setRotSmoother = function(smoother)
 	MODE_ROT_SMOOTHER = smoother
+end
+
+-- whitelist
+M.setAllowedVehicles = function(table) -- [1..n] = vehicle_id (give empty table to disable)
+	SPECTATOR_WHITELIST_VEHICLES = tableVToK(table)
+	evalSpectatorShip()
+end
+
+M.setAllowedPlayers = function(table) -- [1..n] = player_name (give empty table to disable)
+	SPECTATOR_WHITELIST_PLAYERS = tableVToK(table)
+	evalSpectatorShip()
 end
 
 -- raw access to the Heli physics obj.
