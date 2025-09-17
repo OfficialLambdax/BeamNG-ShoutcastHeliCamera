@@ -17,9 +17,11 @@ local PhysicsActor = require("HeliCam/libs/PhysicsActor")
 local HonorableMentions = require("HeliCam/defs/HonorableMentions")
 local SpotlightTypes = require("HeliCam/defs/SpotlightTypes")
 
+local DRAW_TEXTADVANCED = ffi.C.BNG_DBG_DRAW_TextAdvanced
+
 local M = {}
 
-local VERSION = '0.5' -- 16.06.2025 (DD.MM.YYYY)
+local VERSION = '0.51' -- 17.09.2025 (DD.MM.YYYY)
 
 local CAM_NAME = 'helicam'
 local SPECTATE_SOUND
@@ -132,6 +134,20 @@ local function adaptColor(from, into)
 	into.g = from.g
 	into.b = from.b
 	into.a = from.a
+end
+
+-- drop in replacement for debugDrawer:drawTextAdvanced()
+local function drawTextAdvanced(pos, text, txt_color, bg_color)
+	DRAW_TEXTADVANCED(
+		pos.x, pos.y, pos.z,
+		text,
+		color(txt_color.r * 255, txt_color.g * 255, txt_color.b * 255, txt_color.a * 255),
+		true, -- use advanced text
+		false, -- twod
+		color(bg_color.r, bg_color.g, bg_color.b, bg_color.a),
+		false, -- shadow
+		false -- use z
+	)
 end
 
 local function inRange(x, t, y)
@@ -1129,12 +1145,21 @@ local function nameTagRenderRoutine(self, is_enabled, dt)
 	data.background.a = data.background.a * fade
 	
 	pos.z = pos.z + 5
+	--[[
 	debugDrawer:drawTextAdvanced(
 		pos,
 		' ' .. player_name .. (nametag.postfix or PLAYER_TAG_DEFAULT_POSTFIX),
 		data.textcolor, -- text color
 		true, -- draw background
 		false, -- unknown
+		data.background
+	)
+	]]
+	
+	drawTextAdvanced(
+		pos,
+		' ' .. player_name .. (nametag.postfix or PLAYER_TAG_DEFAULT_POSTFIX),
+		data.textcolor,
 		data.background
 	)
 end
