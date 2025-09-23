@@ -21,7 +21,7 @@ local DRAW_TEXTADVANCED = ffi.C.BNG_DBG_DRAW_TextAdvanced
 
 local M = {}
 
-local VERSION = '0.51' -- 17.09.2025 (DD.MM.YYYY)
+local VERSION = '0.52' -- 23.09.2025 (DD.MM.YYYY)
 
 local CAM_NAME = 'helicam'
 local SPECTATE_SOUND
@@ -141,7 +141,7 @@ local function drawTextAdvanced(pos, text, txt_color, bg_color)
 	DRAW_TEXTADVANCED(
 		pos.x, pos.y, pos.z,
 		text,
-		color(txt_color.r * 255, txt_color.g * 255, txt_color.b * 255, txt_color.a * 255),
+		color(txt_color.r * 255, txt_color.g * 255, txt_color.b * 255, txt_color.a * 254),
 		true, -- use advanced text
 		false, -- twod
 		color(bg_color.r, bg_color.g, bg_color.b, bg_color.a),
