@@ -21,7 +21,7 @@ local DRAW_TEXTADVANCED = ffi.C.BNG_DBG_DRAW_TextAdvanced
 
 local M = {}
 
-local VERSION = '0.52' -- 23.09.2025 (DD.MM.YYYY)
+local VERSION = '0.53' -- 28.09.2025 (DD.MM.YYYY)
 
 local CAM_NAME = 'helicam'
 local SPECTATE_SOUND
@@ -1401,7 +1401,7 @@ M.onUpdate = function(dt_real, dt_sim, dt_real)
 			end
 		end
 		
-		if IS_BEAMMP_SESSION and REMOTE_SEND_TIMER:stop() > MP_UPDATE_RATE then
+		if IS_SPAWNED and IS_BEAMMP_SESSION and REMOTE_SEND_TIMER:stop() > MP_UPDATE_RATE then
 		--if REMOTE_SEND_TIMER:stop() > MP_UPDATE_RATE then
 			REMOTE_SEND_TIMER:stopAndReset()
 			TriggerServerEvent('heliCamUpdate', buildRemoteDataFromHeli(HELI))
